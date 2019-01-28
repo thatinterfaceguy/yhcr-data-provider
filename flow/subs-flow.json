@@ -1,0 +1,354 @@
+[
+    {
+        "id": "602aad28.45d06c",
+        "type": "tab",
+        "label": "Subscription Proxy",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "32ed2543.80f0ba",
+        "type": "http in",
+        "z": "602aad28.45d06c",
+        "name": "Post Encounter",
+        "url": "/fhir/STU3/Encounter",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 190,
+        "y": 80,
+        "wires": [
+            [
+                "874fe36d.5db368"
+            ]
+        ]
+    },
+    {
+        "id": "874fe36d.5db368",
+        "type": "http request",
+        "z": "602aad28.45d06c",
+        "name": "Create Encounter",
+        "method": "POST",
+        "ret": "obj",
+        "url": "http://host.docker.internal:8080/fhir/STU3/Encounter",
+        "tls": "",
+        "x": 420,
+        "y": 80,
+        "wires": [
+            [
+                "f3b3e25c.6e9788",
+                "bbe261db.15c03"
+            ]
+        ]
+    },
+    {
+        "id": "f3b3e25c.6e9788",
+        "type": "http response",
+        "z": "602aad28.45d06c",
+        "name": "Encounter Response",
+        "statusCode": "",
+        "headers": {},
+        "x": 720,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "bbe261db.15c03",
+        "type": "function",
+        "z": "602aad28.45d06c",
+        "name": "Add Encounter Id to flow context",
+        "func": "flow.set(\"encounterId\",msg.payload.id);\nmsg.encounterId = msg.payload.id;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 420,
+        "y": 180,
+        "wires": [
+            [
+                "133601d8.b7bcfe",
+                "db0c08ba.d5fe88"
+            ]
+        ]
+    },
+    {
+        "id": "133601d8.b7bcfe",
+        "type": "http request",
+        "z": "602aad28.45d06c",
+        "name": "Get Subscriptions",
+        "method": "GET",
+        "ret": "obj",
+        "url": "http://host.docker.internal:8080/fhir/STU3/Subscription?criteria=Encounter",
+        "tls": "",
+        "x": 410,
+        "y": 260,
+        "wires": [
+            [
+                "61844f0e.9c207"
+            ]
+        ]
+    },
+    {
+        "id": "61844f0e.9c207",
+        "type": "split",
+        "z": "602aad28.45d06c",
+        "name": "Split Results",
+        "splt": "\\n",
+        "spltType": "str",
+        "arraySplt": 1,
+        "arraySpltType": "len",
+        "stream": false,
+        "addname": "",
+        "x": 410,
+        "y": 340,
+        "wires": [
+            [
+                "3918624a.eade76",
+                "681b6018.054728"
+            ]
+        ]
+    },
+    {
+        "id": "3918624a.eade76",
+        "type": "function",
+        "z": "602aad28.45d06c",
+        "name": "Build Subscription Query",
+        "func": "msg.subscription = msg.payload[0];\nmsg.query = msg.subscription.criteria + \"&_id=\" + msg.encounterId;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 430,
+        "y": 420,
+        "wires": [
+            [
+                "83879d7d.207d28",
+                "1d7b9021.873028"
+            ]
+        ]
+    },
+    {
+        "id": "83879d7d.207d28",
+        "type": "http request",
+        "z": "602aad28.45d06c",
+        "name": "Execute Subscription Query",
+        "method": "GET",
+        "ret": "obj",
+        "url": "http://host.docker.internal:8080/fhir/STU3/{{{query}}}",
+        "tls": "",
+        "x": 440,
+        "y": 500,
+        "wires": [
+            [
+                "66051aad.cd24c4"
+            ]
+        ]
+    },
+    {
+        "id": "66051aad.cd24c4",
+        "type": "function",
+        "z": "602aad28.45d06c",
+        "name": "Evaluate Subscription Results",
+        "func": "msg.match = (msg.payload && msg.payload.results.length === 1 && msg.payload.results[0].resourceType === \"Encounter\");\nif(msg.match)\n{\n    var subscription = msg.subscription;\n    \n    msg.type = subscription.channel.type;\n    msg.endpoint = subscription.channel.endpoint;\n    msg.header = subscription.channel.header;\n    msg.payload = msg.payload.results[0];\n    \n    delete msg.query;\n    delete msg.subscription;\n    delete msg.encounterId;\n    delete msg.payload.results;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 450,
+        "y": 580,
+        "wires": [
+            [
+                "a3c43733.7a8ad8",
+                "df929db5.904dd8"
+            ]
+        ]
+    },
+    {
+        "id": "a3c43733.7a8ad8",
+        "type": "switch",
+        "z": "602aad28.45d06c",
+        "name": "Act on Subscription Result",
+        "property": "msg.match = true and msg.type = \"rest-hook\"",
+        "propertyType": "jsonata",
+        "rules": [
+            {
+                "t": "true"
+            },
+            {
+                "t": "false"
+            }
+        ],
+        "checkall": "false",
+        "repair": false,
+        "outputs": 2,
+        "x": 440,
+        "y": 640,
+        "wires": [
+            [
+                "7ee09614.5db018"
+            ],
+            [
+                "a583dd4a.6201e"
+            ]
+        ]
+    },
+    {
+        "id": "a583dd4a.6201e",
+        "type": "debug",
+        "z": "602aad28.45d06c",
+        "name": "No Match",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "x": 620,
+        "y": 780,
+        "wires": []
+    },
+    {
+        "id": "20ae45ef.d9d12a",
+        "type": "http request",
+        "z": "602aad28.45d06c",
+        "name": "Invoke Web Hook",
+        "method": "POST",
+        "ret": "obj",
+        "url": "",
+        "tls": "",
+        "x": 750,
+        "y": 640,
+        "wires": [
+            [
+                "605cdfcc.d16e6"
+            ]
+        ],
+        "inputLabels": [
+            "msg.payload.resource"
+        ]
+    },
+    {
+        "id": "7ee09614.5db018",
+        "type": "function",
+        "z": "602aad28.45d06c",
+        "name": "Configure Web Hook Request",
+        "func": "msg.url = msg.endpoint;\nmsg.headers = {};\nif(msg.header !== undefined && msg.header.length > 0)\n{\n    msg.header.forEach(function(header, idx) {\n        var key, value\n        var headerArray = header.split(\":\");\n        key = headerArray[0];\n        value = headerArray[1];\n        msg.headers[key]=value;\n    });\n    \n    delete msg.header;\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 790,
+        "y": 560,
+        "wires": [
+            [
+                "69d2e00a.7f9378",
+                "da80c009.c385c",
+                "eafc722a.bd69e",
+                "20ae45ef.d9d12a"
+            ]
+        ]
+    },
+    {
+        "id": "69d2e00a.7f9378",
+        "type": "debug",
+        "z": "602aad28.45d06c",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "headers",
+        "x": 1010,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "da80c009.c385c",
+        "type": "debug",
+        "z": "602aad28.45d06c",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 1080,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "eafc722a.bd69e",
+        "type": "debug",
+        "z": "602aad28.45d06c",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "url",
+        "x": 1050,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "605cdfcc.d16e6",
+        "type": "debug",
+        "z": "602aad28.45d06c",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 970,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "681b6018.054728",
+        "type": "debug",
+        "z": "602aad28.45d06c",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 740,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "db0c08ba.d5fe88",
+        "type": "debug",
+        "z": "602aad28.45d06c",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 750,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "1d7b9021.873028",
+        "type": "debug",
+        "z": "602aad28.45d06c",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 710,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "df929db5.904dd8",
+        "type": "debug",
+        "z": "602aad28.45d06c",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "x": 730,
+        "y": 500,
+        "wires": []
+    }
+]

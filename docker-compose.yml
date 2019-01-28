@@ -1,0 +1,47 @@
+version: "2"
+services:
+
+ orchestrator:
+  image: rtweed/qewd-server:latest
+  container_name: orchestrator
+  volumes:
+    - ~/Repos/yhcr-data-provider:/opt/qewd/mapped
+  ports:
+   - 8080:8080
+
+ auth:
+  image: rtweed/qewd-server:latest
+  container_name: auth
+  volumes:
+    - ~/Repos/yhcr-data-provider:/opt/qewd/mapped
+  environment:
+   - microservice=auth_service
+  ports:
+   - 8081:8080
+   
+ fhir:
+  image: rtweed/qewd-server:latest
+  container_name: fhir
+  volumes:
+    - ~/Repos/yhcr-data-provider:/opt/qewd/mapped
+  environment:
+   - microservice=fhir_service
+  ports:
+   - 8082:8080
+
+ hl7:
+  image: rtweed/qewd-server:latest
+  container_name: hl7
+  volumes:
+    - ~/Repos/yhcr-data-provider:/opt/qewd/mapped
+  environment:
+   - microservice=hl7_service
+  ports:
+   - 6880:8080
+ 
+ red:
+  image: nodered/node-red-docker:latest
+  container_name: red
+  ports:
+   - 1880:1880
+   

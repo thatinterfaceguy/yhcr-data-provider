@@ -1,0 +1,30 @@
+[
+    {
+        "uri":"/auth/login",
+        "method":"POST",
+        "handler":"auth",
+        "on_microservice":"auth_service",
+        "authenticate":false
+    },
+    {
+      "uri":"/fhir/STU3/:resource",
+      "method":"POST",
+      "handler":"create",
+      "on_microservice":"fhir_service",
+      "authenticate":false
+    },
+    {
+      "uri":"/fhir/STU3/:resource/:id",
+      "method":"GET",
+      "handler":"read",
+      "on_microservice":"fhir_service",
+      "authenticate":false
+    },
+    {
+      "uri":"/fhir/STU3/:resource",
+      "method":"GET",
+      "handler":"search",
+      "on_microservice":"fhir_service",
+      "authenticate":false
+    }
+]

@@ -1,0 +1,24 @@
+{
+  "qewd_up": true,
+  "microservices": [
+    {
+      "name": "auth_service",
+      "host": "http://host.docker.internal",
+      "port": 8081,
+      "qewd": {
+        "serverName": "Authentication MicroService"
+      }
+    },
+    {
+      "name": "fhir_service",
+      "host": "http://host.docker.internal",
+      "port": 8082,
+      "qewd": {
+        "serverName": "FHIR MicroService"
+      }
+    }
+  ],
+  "jwt": {
+    "secret": "50466e2e-db04-429f-ad20-a69fe61e2e75"
+  }
+}
