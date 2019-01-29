@@ -41,7 +41,7 @@ module.exports = function(documentName, docSubName, query, showDetail) {
       var searchParameter = searchParameters[name]
       if(!searchParameter)
       {
-          return {error: 'Invalid Search Parameter for Patient resource: ' + name, status: {code:400}};
+          return {error: 'Invalid Search Parameter for ' + docSubName + ' ' + resource + ': ' + name, status: {code:400}};
       }
       //Extract the value of the query param...
       searchParameter.value = query[name];
