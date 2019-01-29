@@ -1,3 +1,4 @@
+var fhir = require('fhir').Fhir();
 var uuid = require('uuid');
 
 function isEmptyObject(obj) {
