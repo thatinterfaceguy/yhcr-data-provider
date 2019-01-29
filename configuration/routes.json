@@ -33,5 +33,12 @@
       "handler":"validate",
       "on_microservice":"fhir_service",
       "authenticate":false
+    },
+    {
+      "uri":"/fhir/STU3/:resource/validate",
+      "method":"POST",
+      "handler":"validate",
+      "on_microservice":"fhir_service",
+      "authenticate":false
     }
 ]
