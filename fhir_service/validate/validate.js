@@ -1,4 +1,4 @@
-var fhir = require('fhir').Fhir();
+var Fhir = require('fhir').Fhir;
 var uuid = require('uuid');
 
 function isEmptyObject(obj) {
@@ -35,23 +35,47 @@ module.exports = function(documentName, docSubName, body) {
         console.log(JSON.stringify(results));
         if(results !== undefined && !results.valid)
         {
+            operationOutcome.issue.push(
+                {
+                    code:"invalid",
+                    severity:"error",
+                    diagnostics: "Invalid - see issues for further information"
+                });
+            
             results.messages.forEach(function(message, idx) {
                 var issue = {};
-                issue.code = "error";
-                issue.details = message.message;
-                operationOutcome.push(issue);
+                issue.code = "invalid";
+                issue.severity = message.severity;
+                issue.diagnostics = message.message;
+                issue.location = message.location;
+                operationOutcome.issue.push(issue);
 
             });
         } 
         else 
         {
-            operationOutcome.push(
+            operationOutcome.issue.push(
                 {
-                    severity:"information",
                     code:"informational",
-                    details: "OK"
+                    severity:"information",
+                    details: "OK",
+                    diagnostics: "Valid" + (results.messages != undefined && results.messages.length === 0 ? "" : " - see issues for further information")
                 }
-            )
+            );
+
+            if(results.messages != undefined && results.messages.length > 0)
+            {
+                results.messages.forEach(function(message, idx) {
+                    operationOutcome.issue.push(
+                            {
+                                code:"informational",
+                                severity:message.severity,
+                                location:message.location,
+                                diagnostics: message.message
+                            }
+                        )
+                });
+            } 
         }
     }
     catch(ex)
@@ -61,7 +85,7 @@ module.exports = function(documentName, docSubName, body) {
                 {
                     severity: "fatal",
                     code: "informational",
-                    details: ex,
+                    diagnostics: ex.message,
                 }
             );
     }
