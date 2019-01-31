@@ -1,7 +1,9 @@
-var token = require("./token");
-var reference = require("./reference");
-var string = require("./string");
+var token = require('./token');
+var reference = require('./reference');
+var string = require('./string');
 var id = require("./id");
+var uuid = require('uuid');
+var moment = require('moment');
 
 
 var searchParameters = 
@@ -26,7 +28,7 @@ var searchParameterTypeHandlers =
     "string":string
   }
 
-module.exports = function(documentName, docSubName, query, showDetail) {
+module.exports = function(documentName, docSubName, query) {
   if (typeof docSubName === 'undefined' || docSubName === '') {
     return {error: 'Document name not defined or empty'};
   }
@@ -41,7 +43,7 @@ module.exports = function(documentName, docSubName, query, showDetail) {
       var searchParameter = searchParameters[name]
       if(!searchParameter)
       {
-          return {error: 'Invalid Search Parameter for ' + docSubName + ' ' + resource + ': ' + name, status: {code:400}};
+          return {error: 'Invalid Search Parameter for Patient resource: ' + name, status: {code:400}};
       }
       //Extract the value of the query param...
       searchParameter.value = query[name];
@@ -71,16 +73,12 @@ module.exports = function(documentName, docSubName, query, showDetail) {
     if (value !== '') {
       if (value.indexOf('*') === -1) {
         path.push(value);
-        console.log("search path: " + path);
-        //console.log("value: " + value);
         docIndex.$(path).forEachChild(function(id) {
-          console.log(id);
           children[id] = true;
         });
       }
       else if (value[value.length -1] === '*') { //Support for starts with (Tes*)
         prefix = value.slice(0, -1); // remove * from end
-        console.log("Starts with...");
         docIndex.$(path).forEachChild({prefix: prefix}, function(subs, node) {
           node.forEachChild(function(id) {
             children[id] = true;
@@ -97,11 +95,27 @@ module.exports = function(documentName, docSubName, query, showDetail) {
       }
     }
   }
-  var results = [];
-  var doc = this.db.use(documentName, docSubName);
-  
-  for (id in matches) {
-    results.push(doc.$(id).getDocument(true));
+  //Return bundle
+  var bundle = {
+    resourceType:"Bundle",
+    id: uuid.v4(),
+    meta:{
+      lastUpdated: moment().utc().format()
+    },
+    type:"searchset",
+    total:0,
+    entry:[]
   }
-  return results;
+  doc = this.db.use(documentName, docSubName);
+  for(id in matches)
+  {
+    var resource = doc.$(id).getDocument(true);
+    var entry = {
+      fullUrl:'http://localhost:8080/fhir/STU3/'+resource.resourceType+'/'+resource.id,
+      resource: resource
+    };
+    bundle.entry.push(entry); 
+    bundle.total += 1;
+  }
+  return bundle;
 };

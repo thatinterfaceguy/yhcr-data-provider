@@ -6,7 +6,7 @@
       "host": "http://host.docker.internal",
       "port": 8081,
       "qewd": {
-        "serverName": "Authentication MicroService"
+        "serverName": "Authentication"
       }
     },
     {
@@ -14,7 +14,7 @@
       "host": "http://host.docker.internal",
       "port": 8082,
       "qewd": {
-        "serverName": "FHIR MicroService"
+        "serverName": "FHIR"
       }
     }
   ],
