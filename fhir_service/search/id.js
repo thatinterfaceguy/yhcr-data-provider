@@ -1,18 +1,19 @@
-module.exports = function(searchParameter) 
-{
-    /*
-    //String search = means starts with http://hl7.org/fhir/stu3/search.html#string
-    In (examples)
-    {
-        '_id':'123123123123'
+var queryTypeHandler = {
+    select: function(query) {
+        var selectors = [];
+        selectors.push(
+            {
+                path: (query.searchParameter.path).split('.')
+            }
+        );
+        return selectors;
+    },
+    filter: function(query, resource) {
+        console.log("Id Evaluate: Resource " + JSON.stringify(resource, null, 2) + ", User Value " + query.value);
+        return (resource[query.path] === query.value);
     }
-    Out
-    { 
-        'id':'123123123123',
-    }
-    */
+};
 
-    var query = {}
-    query[searchParameter.expression] = searchParameter.value;
-    return query;
-}
+module.exports = {
+queryTypeHandler
+};

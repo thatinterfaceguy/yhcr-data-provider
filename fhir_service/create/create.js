@@ -87,16 +87,16 @@ module.exports = function(documentName, docSubName, body, checkId) {
   //Add an id property to the resource before persisting...
   if(typeof resource.id === 'undefined' || resource.id.length === 0) resource.id = uuid.v4();
   //Set meta/version id...
-  if(resource.meta === undefined) { 
-    resource.meta = {}
+  if(resource.meta === undefined || (resource.meta !== undefined && resource.meta.versionId === undefined)) { 
+    resource.meta = resource.meta || {};
     resource.meta.versionId = "1";
     resource.meta.lastUpdated = moment().utc().format();
   }
   var doc = this.db.use(documentName, docSubName);
-  console.log(JSON.stringify(doc,null,2));
-  console.log(JSON.stringify(resource,null,2));
   doc.$(resource.id).setDocument(resource);
   //Create indices
+  //Loop over searchParameter file for indexable properties
+  //ResourcesPatientIndexparameterName
   var docIndex = this.db.use(documentName + 'Index', docSubName);
   traverse(resource).map(function(node) {
     if (typeof node !== 'object' && node !== '') {
@@ -111,7 +111,6 @@ module.exports = function(documentName, docSubName, body, checkId) {
   });
   //Create version...
   version.call(this, documentName, docSubName, resource);
-  //ResourcesVersions("Subscription","632e6b3c-9d07-4925-bab6-cdc2c83c1ceb","meta","versionId")=1
 
   return resource;
 };

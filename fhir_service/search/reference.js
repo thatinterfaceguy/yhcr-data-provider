@@ -1,17 +1,18 @@
-module.exports = function(searchParameter) 
-{
-    /*
-    In
-    {
-        'general-practitioner':''
+var queryTypeHandler = {
+    select: function(query) {
+        var selectors = [];
+        selectors.push(
+            {
+                path: (query.searchParameter.path + ".reference").split('.')
+            }
+        );
+        return selectors;
+    },
+    filter: function(query, resource) {
+        return resource[query.searchParameter.path] === query.value;
     }
-    Out
-    { 
-        'generalPractitioner.reference': '',
-    }
-    */
+};
 
-    var query = {}
-    query[searchParameter.expression + '.reference'] = searchParameter.value;
-    return query;
-}
+module.exports = {
+    queryTypeHandler
+};
