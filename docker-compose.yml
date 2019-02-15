@@ -29,6 +29,16 @@ services:
   ports:
    - 8082:8080
 
+ index:
+  image: rtweed/qewd-server:latest
+  container_name: index
+  volumes:
+    - ~/Repos/yhcr-data-provider:/opt/qewd/mapped
+  environment:
+   - microservice=index_service
+  ports:
+   - 8083:8080
+
  hl7:
   image: rtweed/qewd-server:latest
   container_name: hl7

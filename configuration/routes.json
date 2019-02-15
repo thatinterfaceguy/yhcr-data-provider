@@ -61,5 +61,15 @@
       "handler":"history",
       "on_microservice":"fhir_service",
       "authenticate":false
+    },
+    {
+      "uri":"/roqr/api/services/index",
+      "method":"POST",
+      "handler":"create",
+      "on_microservice":"index_service",
+      "from_microservices":[
+        "fhir_service"
+      ],
+      "authenticate":false
     }
 ]

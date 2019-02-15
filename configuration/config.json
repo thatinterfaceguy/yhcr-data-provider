@@ -16,6 +16,14 @@
       "qewd": {
         "serverName": "FHIR"
       }
+    },
+    {
+      "name": "index_service",
+      "host": "http://host.docker.internal",
+      "port": 8083,
+      "qewd": {
+        "serverName": "Index"
+      }
     }
   ],
   "jwt": {

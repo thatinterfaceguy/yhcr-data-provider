@@ -47,6 +47,7 @@ module.exports = function(req, res, next) {
         res.set('Content-Length', msg.length);
         res.status(code).send(msg);
     } else {
+        //Scan request path? Only want to return FHIR resources if request was against FHIR API
         var resource = msg;
         if(resource.token) delete resource.token;
         //Send Response...

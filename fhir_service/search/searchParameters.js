@@ -98,6 +98,7 @@ var resources = {
                 modifiers:["contains","exact"],
                 type:"string",
                 path:"address.postalCode"
+                //index:ixpatientpostalcode
             },
             {
                 name:"birthdate",

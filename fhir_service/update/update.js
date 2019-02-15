@@ -4,7 +4,7 @@ var uuid = require('uuid');
 
 var del = require('../delete/delete.js');
 var create = require('../create/create.js');
-var version = require('../common/version.js');
+var version = require('../common/versions/version.js');
 
 function isEmptyObject(obj) {
     for (var prop in obj) {
